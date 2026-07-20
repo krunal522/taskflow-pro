@@ -1,0 +1,494 @@
+{
+  "info": {
+    "name": "TaskFlow Pro API",
+    "_postman_id": "taskflow-pro-collection-2024",
+    "description": "Complete API Collection for TaskFlow Pro\nNode.js + Express + MongoDB Backend\nAuthor: Krunal - Jr. Full Stack Developer\n\nHOW TO USE:\n1. Import this file in Postman\n2. First run: POST Register\n3. Then run: POST Login → Copy the TOKEN\n4. Set TOKEN in Authorization for all private routes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "TOKEN",
+      "value": "paste_your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "TASK_ID",
+      "value": "paste_task_id_here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 AUTH",
+      "item": [
+        {
+          "name": "1. Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('TOKEN', jsonData.token);",
+                  "    console.log('✅ Token auto-saved!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Krunal Patel\",\n  \"email\": \"krunal@taskflow.com\",\n  \"password\": \"krunal123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/register",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user.\n\nRequired Body:\n- name: string (min 2 chars)\n- email: valid email\n- password: min 6 chars\n\nReturns: JWT token + user info"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Account created successfully! Welcome to TaskFlow Pro 🚀\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"6a5e134b4bd272a9eea50245\",\n    \"name\": \"Krunal Patel\",\n    \"email\": \"krunal@taskflow.com\",\n    \"avatar\": \"KP\",\n    \"role\": \"user\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('TOKEN', jsonData.token);",
+                  "    console.log('✅ Token saved! Copy karo:', jsonData.token.substring(0, 30) + '...');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"krunal@taskflow.com\",\n  \"password\": \"krunal123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with email & password.\n\nRequired Body:\n- email: registered email\n- password: your password\n\nReturns: JWT token (copy this token for private routes!)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Welcome back, Krunal Patel! 👋\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"6a5e134b4bd272a9eea50245\",\n    \"name\": \"Krunal Patel\",\n    \"email\": \"krunal@taskflow.com\",\n    \"avatar\": \"KP\",\n    \"role\": \"user\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Get My Profile (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Get currently logged-in user info.\n\nNO BODY needed.\nRequires: Authorization header with Bearer token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 TASKS",
+      "item": [
+        {
+          "name": "4. Get All Tasks (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "todo",
+                  "description": "Filter: todo | inprogress | done | all",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "description": "Filter: low | medium | high | all",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "Development",
+                  "description": "Filter by category name",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "react",
+                  "description": "Search in title or description",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all tasks for logged-in user.\n\nNO BODY needed.\nOptional Query Params:\n- ?status=todo (todo | inprogress | done)\n- ?priority=high (low | medium | high)\n- ?category=Development\n- ?search=react\n\nReturns: tasks array + stats (total, todo, inprogress, done, highPriority)"
+          }
+        },
+        {
+          "name": "5. Create New Task (🔒 Private)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.task && jsonData.task._id) {",
+                  "    pm.collectionVariables.set('TASK_ID', jsonData.task._id);",
+                  "    console.log('✅ Task ID saved:', jsonData.task._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Build React Dashboard\",\n  \"description\": \"Create Kanban board with drag and drop functionality\",\n  \"status\": \"todo\",\n  \"priority\": \"high\",\n  \"category\": \"Development\",\n  \"dueDate\": \"2024-08-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks"]
+            },
+            "description": "Create a new task.\n\nRequired Body:\n- title: string (required!)\n\nOptional Body:\n- description: string\n- status: 'todo' | 'inprogress' | 'done' (default: todo)\n- priority: 'low' | 'medium' | 'high' (default: medium)\n- category: string (default: General)\n- dueDate: date string (YYYY-MM-DD)"
+          }
+        },
+        {
+          "name": "6. Get Single Task (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/{{TASK_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "{{TASK_ID}}"]
+            },
+            "description": "Get one task by ID.\n\nNO BODY needed.\nChange {{TASK_ID}} to actual MongoDB ObjectId\n\nExample: /api/tasks/6a5e134b4bd272a9eea50246"
+          }
+        },
+        {
+          "name": "7. Update Task (🔒 Private)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Build React Dashboard - Updated\",\n  \"description\": \"Updated: Added dark theme and responsive layout\",\n  \"status\": \"inprogress\",\n  \"priority\": \"high\",\n  \"category\": \"Development\",\n  \"dueDate\": \"2024-08-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/{{TASK_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "{{TASK_ID}}"]
+            },
+            "description": "Update any field of a task.\n\nBody: Send only fields you want to update\n- title, description, status, priority, category, dueDate"
+          }
+        },
+        {
+          "name": "8. Update Task Status Only (🔒 Private)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"done\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/{{TASK_ID}}/status",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "{{TASK_ID}}", "status"]
+            },
+            "description": "Quick status update (used for Kanban drag & drop).\n\nBody:\n- status: 'todo' | 'inprogress' | 'done'\n\nOnly 1 field needed!"
+          }
+        },
+        {
+          "name": "9. Delete Task (🔒 Private)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/{{TASK_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "{{TASK_ID}}"]
+            },
+            "description": "Delete a task by ID.\n\nNO BODY needed.\nReturns: success message + deleted taskId"
+          }
+        },
+        {
+          "name": "10. Get Tasks - Filter by Status (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks?status=todo",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "todo"
+                }
+              ]
+            },
+            "description": "Filter tasks by status.\nChange status value: todo | inprogress | done"
+          }
+        },
+        {
+          "name": "11. Search Tasks (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks?search=react",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "react"
+                }
+              ]
+            },
+            "description": "Search tasks by title or description keyword."
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 USER",
+      "item": [
+        {
+          "name": "12. Get My Profile (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/users/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Get logged-in user's profile.\n\nNO BODY needed."
+          }
+        },
+        {
+          "name": "13. Update My Profile (🔒 Private)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Krunal Patel Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/users/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Update user profile.\n\nOptional Body:\n- name: new name string\n- password: new password (min 6 chars)\n\nSend only what you want to update."
+          }
+        },
+        {
+          "name": "14. Get Task Statistics (🔒 Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/users/stats",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "users", "stats"]
+            },
+            "description": "Get task statistics for dashboard.\n\nNO BODY needed.\nReturns: total, todo, inprogress, done, completionRate%, byPriority"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏥 HEALTH CHECK",
+      "item": [
+        {
+          "name": "15. Root API Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/",
+              "host": ["{{BASE_URL}}"],
+              "path": [""]
+            },
+            "description": "Check if API is running.\nNo auth needed."
+          }
+        },
+        {
+          "name": "16. Health Check (Azure Ready)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/health",
+              "host": ["{{BASE_URL}}"],
+              "path": ["health"]
+            },
+            "description": "Health check endpoint for Azure deployment.\nShows: server status, DB connection, uptime."
+          }
+        }
+      ]
+    }
+  ]
+}

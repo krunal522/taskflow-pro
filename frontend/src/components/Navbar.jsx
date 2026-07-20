@@ -1,0 +1,79 @@
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAppDispatch, useAppSelector } from '../store';
+import { logout, selectUser, selectIsAuthenticated } from '../features/auth/store/authSlice';
+import { ROUTES } from '../routes/routeConstants';
+import './Navbar.css';
+
+const Navbar = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    toast.success('Logged out successfully!');
+    navigate(ROUTES.LOGIN);
+  };
+
+  return (
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <Link to={isAuthenticated ? ROUTES.DASHBOARD : ROUTES.HOME} className="navbar-logo">
+          <div className="logo-icon">⚡</div>
+          <span className="gradient-text">TaskFlow Pro</span>
+        </Link>
+
+        <div className="navbar-actions">
+          {isAuthenticated && user ? (
+            <div style={{ position: 'relative' }} ref={menuRef}>
+              <div className="user-avatar" onClick={() => setMenuOpen(!menuOpen)} title={user.name}>
+                {user.avatar || user.name?.slice(0, 2).toUpperCase()}
+              </div>
+
+              {menuOpen && (
+                <div className="user-menu">
+                  <div className="user-menu-header">
+                    <div className="user-menu-name">{user.name}</div>
+                    <div className="user-menu-email">{user.email}</div>
+                  </div>
+                  <button className="user-menu-item" onClick={() => { navigate(ROUTES.DASHBOARD); setMenuOpen(false); }}>
+                    <LayoutDashboard size={15} /> Dashboard
+                  </button>
+                  <button className="user-menu-item" onClick={() => { navigate(ROUTES.PROFILE); setMenuOpen(false); }}>
+                    <User size={15} /> Profile
+                  </button>
+                  <button className="user-menu-item danger" onClick={handleLogout}>
+                    <LogOut size={15} /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link to={ROUTES.LOGIN} className="btn btn-secondary btn-sm">Login</Link>
+              <Link to={ROUTES.REGISTER} className="btn btn-primary btn-sm">
+                <Zap size={14} /> Get Started
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
