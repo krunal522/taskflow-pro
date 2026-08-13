@@ -247,7 +247,7 @@ const ProfilePage = () => {
           <div className="profile-avatar-wrap" onClick={() => avatarInputRef.current?.click()} title="Click to change photo" style={{ cursor: 'pointer' }}>
             {user?.avatarUrl ? (
               <img
-                src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.avatarUrl}`}
+                src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.avatarUrl}`}
                 alt={user.name}
                 className="profile-avatar profile-avatar-img"
               />

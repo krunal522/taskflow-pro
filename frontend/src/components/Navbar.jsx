@@ -41,7 +41,15 @@ const Navbar = () => {
           {isAuthenticated && user ? (
             <div style={{ position: 'relative' }} ref={menuRef}>
               <div className="user-avatar" onClick={() => setMenuOpen(!menuOpen)} title={user.name}>
-                {user.avatar || user.name?.slice(0, 2).toUpperCase()}
+                {user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.avatarUrl}`}
+                    alt={user.name}
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  user.avatar || user.name?.slice(0, 2).toUpperCase()
+                )}
               </div>
 
               {menuOpen && (
