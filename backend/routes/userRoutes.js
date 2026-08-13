@@ -8,9 +8,9 @@ const express = require('express');
 const router = express.Router();
 const { getProfile, updateProfile, getUserStats, deleteAccount, uploadAvatar } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
-const upload   = require('../middleware/uploadMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
-// Apply protect to all user routes
+// Apply protect to all user rouates
 router.use(protect);
 
 // GET  /api/users/me        → Get my profile

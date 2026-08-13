@@ -12,7 +12,7 @@ const Task = require('../models/Task');
 // ============================================
 const getTasks = async (req, res) => {
   try {
-    const { status, priority, category, search } = req.query;
+    const { status, priority, category, tag, search, sortBy } = req.query;
 
     // Build query filter
     const filter = { user: req.user.id };
@@ -20,16 +20,23 @@ const getTasks = async (req, res) => {
     if (status && status !== 'all') filter.status = status;
     if (priority && priority !== 'all') filter.priority = priority;
     if (category && category !== 'all') filter.category = category;
+    if (tag && tag !== 'all') filter.tags = tag;
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
+        { tags: { $regex: search, $options: 'i' } },
       ];
     }
 
-    // Fetch tasks from MongoDB (newest first)
+    // Determine sorting logic
+    let sortOptions = { createdAt: -1 };
+    if (sortBy === 'oldest') sortOptions = { createdAt: 1 };
+    if (sortBy === 'dueSoon') sortOptions = { dueDate: 1 };
+
+    // Fetch tasks from MongoDB
     const tasks = await Task.find(filter)
-      .sort({ createdAt: -1 })
+      .sort(sortOptions)
       .select('-__v'); // Exclude __v field
 
     // Get stats using static method
@@ -80,7 +87,7 @@ const getTaskById = async (req, res) => {
 // ============================================
 const createTask = async (req, res) => {
   try {
-    const { title, description, status, priority, category, dueDate } = req.body;
+    const { title, description, status, priority, category, dueDate, subtasks, tags } = req.body;
 
     // Create task in MongoDB
     const task = await Task.create({
@@ -90,6 +97,8 @@ const createTask = async (req, res) => {
       priority: priority || 'medium',
       category: category || 'General',
       dueDate: dueDate || null,
+      subtasks: Array.isArray(subtasks) ? subtasks : [],
+      tags: Array.isArray(tags) ? tags : [],
       user: req.user.id, // Link to logged-in user
     });
 
@@ -115,12 +124,12 @@ const createTask = async (req, res) => {
 // ============================================
 const updateTask = async (req, res) => {
   try {
-    const { title, description, status, priority, category, dueDate } = req.body;
+    const { title, description, status, priority, category, dueDate, subtasks, tags } = req.body;
 
     // Find and update in ONE MongoDB query
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id }, // Filter: only owner can update
-      { title, description, status, priority, category, dueDate },
+      { title, description, status, priority, category, dueDate, subtasks, tags },
       {
         new: true,        // Return updated document
         runValidators: true, // Run schema validations

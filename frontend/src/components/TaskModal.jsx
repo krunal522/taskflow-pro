@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2, CheckSquare, Square, Tag } from 'lucide-react';
 import { CATEGORY_OPTIONS } from '../utils/constants';
 import { validators } from '../utils/validators';
-import toast from 'react-hot-toast';
 
 const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
   const isEdit = !!task;
@@ -13,7 +12,10 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
     priority: task?.priority || 'medium',
     category: task?.category || 'General',
     dueDate: task?.dueDate ? task.dueDate.slice(0, 10) : '',
+    subtasks: task?.subtasks || [],
+    tags: task?.tags ? task.tags.join(', ') : '',
   });
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
@@ -21,11 +23,42 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
     if (error) setError('');
   };
 
+  // Subtask Handlers
+  const handleAddSubtask = (e) => {
+    e.preventDefault();
+    if (!newSubtaskTitle.trim()) return;
+    setForm(p => ({
+      ...p,
+      subtasks: [...p.subtasks, { title: newSubtaskTitle.trim(), completed: false }]
+    }));
+    setNewSubtaskTitle('');
+  };
+
+  const handleToggleSubtask = (index) => {
+    setForm(p => ({
+      ...p,
+      subtasks: p.subtasks.map((st, i) => i === index ? { ...st, completed: !st.completed } : st)
+    }));
+  };
+
+  const handleRemoveSubtask = (index) => {
+    setForm(p => ({
+      ...p,
+      subtasks: p.subtasks.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const titleErr = validators.taskTitle(form.title);
     if (titleErr) { setError(titleErr); return; }
-    onSaved(form, isEdit ? task._id : null);
+
+    const formattedPayload = {
+      ...form,
+      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+    };
+
+    onSaved(formattedPayload, isEdit ? task._id : null);
   };
 
   // Close on Escape
@@ -37,7 +70,7 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box animate-slide">
+      <div className="modal-box animate-slide" style={{ maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="modal-header">
           <h2 className="modal-title">{isEdit ? '✏️ Edit Task' : '✅ New Task'}</h2>
           <button className="modal-close" onClick={onClose}><X size={16} /></button>
@@ -59,8 +92,8 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
           <div className="form-group">
             <label className="form-label">Description</label>
             <textarea className="form-input" name="description" placeholder="What needs to be done?"
-              value={form.description} onChange={handleChange} rows={3}
-              style={{ resize: 'vertical', minHeight: '80px' }} />
+              value={form.description} onChange={handleChange} rows={2}
+              style={{ resize: 'vertical', minHeight: '65px' }} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -93,6 +126,57 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
               <label className="form-label">Due Date</label>
               <input className="form-input" type="date" name="dueDate"
                 value={form.dueDate} onChange={handleChange} style={{ colorScheme: 'dark' }} />
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="form-group">
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Tag size={13} /> Tags <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(comma separated)</span>
+            </label>
+            <input className="form-input" name="tags" placeholder="e.g. design, urgent, frontend"
+              value={form.tags} onChange={handleChange} />
+          </div>
+
+          {/* Subtasks Builder */}
+          <div className="form-group" style={{ background: 'var(--bg-glass)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span>Subtasks / Checklist</span>
+              {form.subtasks.length > 0 && (
+                <span style={{ fontSize: '11px', color: 'var(--accent-secondary)' }}>
+                  {form.subtasks.filter(s => s.completed).length}/{form.subtasks.length} Done
+                </span>
+              )}
+            </label>
+
+            {/* List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+              {form.subtasks.map((st, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-input)', padding: '6px 10px', borderRadius: '6px', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: 1, textDecoration: st.completed ? 'line-through' : 'none', opacity: st.completed ? 0.6 : 1 }} onClick={() => handleToggleSubtask(idx)}>
+                    {st.completed ? <CheckSquare size={15} color="var(--green)" /> : <Square size={15} color="var(--text-muted)" />}
+                    <span>{st.title}</span>
+                  </div>
+                  <button type="button" onClick={() => handleRemoveSubtask(idx)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 2 }}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add Input */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                className="form-input"
+                placeholder="Add subtask item..."
+                value={newSubtaskTitle}
+                onChange={e => setNewSubtaskTitle(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSubtask(e); } }}
+                style={{ fontSize: '13px', padding: '8px 12px' }}
+              />
+              <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddSubtask}>
+                <Plus size={14} /> Add
+              </button>
             </div>
           </div>
 

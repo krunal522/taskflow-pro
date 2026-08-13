@@ -46,6 +46,15 @@ const taskSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    subtasks: [
+      {
+        title: { type: String, required: true, trim: true },
+        completed: { type: Boolean, default: false }
+      }
+    ],
+    tags: [
+      { type: String, trim: true }
+    ],
     // Reference to User who owns this task
     user: {
       type: mongoose.Schema.Types.ObjectId,

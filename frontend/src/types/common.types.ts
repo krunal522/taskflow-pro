@@ -6,6 +6,12 @@ export type TaskStatus = 'todo' | 'inprogress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
 export type Theme = 'dark' | 'light';
 
+export interface Subtask {
+  _id?: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Task {
   _id: string;
   title: string;
@@ -14,6 +20,8 @@ export interface Task {
   priority: TaskPriority;
   category: string;
   dueDate: string | null;
+  subtasks?: Subtask[];
+  tags?: string[];
   user: string;
   createdAt: string;
   updatedAt: string;
@@ -34,6 +42,8 @@ export interface CreateTaskPayload {
   priority?: TaskPriority;
   category?: string;
   dueDate?: string | null;
+  subtasks?: Subtask[];
+  tags?: string[];
 }
 
 export interface UpdateTaskPayload extends Partial<CreateTaskPayload> {}

@@ -204,16 +204,11 @@ const uploadAvatar = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Delete old avatar file if it exists on disk
-    if (user.avatarUrl) {
-      const oldPath = path.join(__dirname, '..', user.avatarUrl.replace(/^\//, ''));
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
-      }
-    }
+    // Convert image buffer to Base64 Data URI
+    // Persists directly in MongoDB Atlas so avatars NEVER break on Vercel/Serverless deployments!
+    const base64Avatar = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
-    // Save relative URL (served as static from /uploads/avatars/)
-    user.avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    user.avatarUrl = base64Avatar;
     await user.save();
 
     res.json({
