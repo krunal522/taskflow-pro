@@ -27,7 +27,10 @@ const app = express();
 // MIDDLEWARE
 // ============================================
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: function (origin, callback) {
+    // Allow all origins (Vercel, Netlify, localhost, etc.)
+    callback(null, true);
+  },
   credentials: true,
 }));
 app.use(express.json());
