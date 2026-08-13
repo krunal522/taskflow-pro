@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.7.4",
     "morgan": "^1.10.0",
+    "multer": "^2.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

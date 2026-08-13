@@ -7,6 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/db');
 
 // Load environment variables FIRST
@@ -36,6 +37,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Logs: GET /api/tasks 200 12ms
+
+// Serve uploaded avatars as static files
+// URL: http://localhost:5000/uploads/avatars/<filename>
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ============================================
 // API ROUTES

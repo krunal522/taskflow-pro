@@ -8,8 +8,11 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  avatar: string;      // Initials fallback (e.g. "KS")
+  avatarUrl?: string | null; // Uploaded image URL
   role: UserRole;
+  bio?: string;
+  phone?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -31,7 +34,15 @@ export interface RegisterPayload {
 
 export interface UpdateProfilePayload {
   name?: string;
+  email?: string;
+  bio?: string;
+  phone?: string;
+  currentPassword?: string;
   password?: string;
+}
+
+export interface DeleteAccountPayload {
+  password: string;
 }
 
 export interface UserStats {

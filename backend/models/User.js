@@ -34,12 +34,28 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: 'US',
+      default: 'US', // Initials fallback (e.g. "KS")
+    },
+    avatarUrl: {
+      type: String,
+      default: null, // Null = use initials, otherwise URL to uploaded image
     },
     role: {
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [160, 'Bio cannot exceed 160 characters'],
+      default: '',
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: [20, 'Phone cannot exceed 20 characters'],
+      default: '',
     },
   },
   {
@@ -85,8 +101,12 @@ userSchema.methods.toPublicJSON = function () {
     name: this.name,
     email: this.email,
     avatar: this.avatar,
+    avatarUrl: this.avatarUrl || null,
     role: this.role,
+    bio: this.bio,
+    phone: this.phone,
     createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
   };
 };
 
