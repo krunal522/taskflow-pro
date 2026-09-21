@@ -821,3 +821,48 @@
     width: 100%;
   }
 }
+
+/* Staff Tools & Command Bar Highlights */
+.command-trigger-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(124, 58, 237, 0.1) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+  color: var(--accent-secondary) !important;
+}
+
+.command-trigger-header:hover {
+  background: rgba(124, 58, 237, 0.2) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+.kbd-shortcut-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.sidebar-kbd {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.task-card.card-selected {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3) !important;
+  background: rgba(124, 58, 237, 0.08) !important;
+}
+

@@ -24,6 +24,9 @@ const STATUS_GROUPS = [
 
 const TaskListView = ({
   tasks = [],
+  selectedTaskIds = [],
+  onToggleSelectTask,
+  onSelectAllGroup,
   onStatusChange,
   onEdit,
   onDelete,
@@ -51,7 +54,14 @@ const TaskListView = ({
 
   if (tasks.length === 0) {
     return (
-      <div className="empty-state" style={{ padding: '60px 16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)' }}>
+      <div
+        className="empty-state"
+        style={{
+          padding: '60px 16px',
+          background: 'var(--bg-card)',
+          borderRadius: 'var(--radius-xl)',
+        }}
+      >
         <div className="empty-icon">📭</div>
         <p className="empty-text">No tasks found matching your filters</p>
       </div>
@@ -64,10 +74,28 @@ const TaskListView = ({
         const groupTasks = tasks.filter((t) => t.status === group.key);
         if (groupTasks.length === 0) return null;
 
+        const allGroupSelected =
+          groupTasks.length > 0 &&
+          groupTasks.every((t) => selectedTaskIds.includes(t._id));
+
         return (
           <div key={group.key} className={`list-group-section ${group.key}`}>
             <div className="list-group-header">
               <div className="list-group-title">
+                {onSelectAllGroup && (
+                  <button
+                    type="button"
+                    className="list-group-select-all-btn"
+                    onClick={() => onSelectAllGroup(groupTasks.map((t) => t._id))}
+                    title={allGroupSelected ? 'Deselect group' : 'Select all in group'}
+                  >
+                    {allGroupSelected ? (
+                      <CheckSquare size={15} color="var(--accent-secondary)" />
+                    ) : (
+                      <Square size={15} color="var(--text-muted)" />
+                    )}
+                  </button>
+                )}
                 <span className="group-emoji">{group.emoji}</span>
                 <span className="group-name">{group.label}</span>
                 <span className="group-count">{groupTasks.length}</span>
@@ -78,13 +106,36 @@ const TaskListView = ({
               {groupTasks.map((task) => {
                 const due = getDueDateLabel(task.dueDate);
                 const totalSubtasks = task.subtasks?.length || 0;
-                const completedSubtasks = task.subtasks?.filter((s) => s.completed).length || 0;
+                const completedSubtasks =
+                  task.subtasks?.filter((s) => s.completed).length || 0;
                 const isExpanded = !!expandedSubtasks[task._id];
                 const isDone = task.status === 'done';
+                const isSelected = selectedTaskIds.includes(task._id);
 
                 return (
-                  <div key={task._id} className={`list-row-wrapper ${task.priority}`}>
+                  <div
+                    key={task._id}
+                    className={`list-row-wrapper ${task.priority} ${
+                      isSelected ? 'row-selected' : ''
+                    }`}
+                  >
                     <div className="list-row">
+                      {/* Multi-Select Checkbox */}
+                      {onToggleSelectTask && (
+                        <button
+                          type="button"
+                          className="list-select-box-btn"
+                          onClick={() => onToggleSelectTask(task._id)}
+                          title="Select task for bulk action"
+                        >
+                          {isSelected ? (
+                            <CheckSquare size={16} color="var(--accent-secondary)" />
+                          ) : (
+                            <Square size={16} color="var(--text-muted)" />
+                          )}
+                        </button>
+                      )}
+
                       {/* Quick Status Toggle Checkbox */}
                       <button
                         type="button"
@@ -102,7 +153,11 @@ const TaskListView = ({
                       {/* Main Info */}
                       <div className="list-main-info" onClick={() => onEdit(task)}>
                         <div className="list-title-wrap">
-                          <span className={`list-task-title ${isDone ? 'completed-text' : ''}`}>
+                          <span
+                            className={`list-task-title ${
+                              isDone ? 'completed-text' : ''
+                            }`}
+                          >
                             {task.title}
                           </span>
                           {task.category && (
@@ -137,7 +192,11 @@ const TaskListView = ({
                             <span>
                               {completedSubtasks}/{totalSubtasks}
                             </span>
-                            {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                            {isExpanded ? (
+                              <ChevronDown size={12} />
+                            ) : (
+                              <ChevronRight size={12} />
+                            )}
                           </button>
                         ) : (
                           <button
@@ -177,7 +236,9 @@ const TaskListView = ({
 
                       {/* Priority */}
                       <div className="list-priority-cell">
-                        <span className={`badge badge-${task.priority}`}>{task.priority}</span>
+                        <span className={`badge badge-${task.priority}`}>
+                          {task.priority}
+                        </span>
                       </div>
 
                       {/* Due Date */}
@@ -206,7 +267,10 @@ const TaskListView = ({
                       </div>
 
                       {/* Actions */}
-                      <div className="list-actions-cell" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="list-actions-cell"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           className="task-action-btn"
                           onClick={() => onDuplicate(task)}
@@ -243,7 +307,9 @@ const TaskListView = ({
                               <div
                                 className="subtasks-mini-fill"
                                 style={{
-                                  width: `${Math.round((completedSubtasks / totalSubtasks) * 100)}%`,
+                                  width: `${Math.round(
+                                    (completedSubtasks / totalSubtasks) * 100
+                                  )}%`,
                                 }}
                               />
                             </div>
@@ -255,17 +321,24 @@ const TaskListView = ({
                             {task.subtasks.map((st, idx) => (
                               <div
                                 key={idx}
-                                className={`subtask-check-row ${st.completed ? 'completed' : ''}`}
+                                className={`subtask-check-row ${
+                                  st.completed ? 'completed' : ''
+                                }`}
                                 onClick={() => onToggleSubtask(task._id, idx)}
                               >
-                                <button type="button" className="subtask-checkbox-btn">
+                                <button
+                                  type="button"
+                                  className="subtask-checkbox-btn"
+                                >
                                   {st.completed ? (
                                     <CheckSquare size={14} color="var(--green)" />
                                   ) : (
                                     <Square size={14} color="var(--text-muted)" />
                                   )}
                                 </button>
-                                <span className="subtask-check-text">{st.title}</span>
+                                <span className="subtask-check-text">
+                                  {st.title}
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -287,7 +360,10 @@ const TaskListView = ({
                               }))
                             }
                           />
-                          <button type="submit" className="inline-subtask-submit-btn">
+                          <button
+                            type="submit"
+                            className="inline-subtask-submit-btn"
+                          >
                             <Plus size={13} /> Add
                           </button>
                         </form>

@@ -22,6 +22,9 @@ import {
   X,
   Sparkles,
   Layers,
+  Command,
+  Activity,
+  Target,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
@@ -29,6 +32,10 @@ import TaskModal from '../components/TaskModal';
 import TaskListView from '../components/TaskListView';
 import AnalyticsModal from '../components/AnalyticsModal';
 import ShortcutsModal from '../components/ShortcutsModal';
+import CommandPalette from '../components/CommandPalette';
+import BulkActionBar from '../components/BulkActionBar';
+import FocusTimerModal from '../components/FocusTimerModal';
+import ActivityDrawer from '../components/ActivityDrawer';
 import { useAppDispatch, useAppSelector } from '../store';
 import {
   fetchTasks,
@@ -68,8 +75,24 @@ const Dashboard = () => {
   const [modal, setModal] = useState(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isFocusTimerOpen, setIsFocusTimerOpen] = useState(false);
+  const [isActivityDrawerOpen, setIsActivityDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState(() => {
     return localStorage.getItem('taskflow_view_mode') || 'board';
+  });
+
+  // Multi-Select Batch State
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+
+  // Session Activity State
+  const [activities, setActivities] = useState(() => {
+    try {
+      const stored = localStorage.getItem('taskflow_activities');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   // Filter & Search States
@@ -90,6 +113,25 @@ const Dashboard = () => {
   const exportMenuRef = useRef(null);
   const debouncedSearch = useDebounce(searchInput, 350);
 
+  // Activity logger helper
+  const logActivity = (type, action, taskTitle = '', details = '') => {
+    const newEntry = {
+      id: 'act-' + Date.now() + Math.random().toString(36).slice(2, 6),
+      type,
+      action,
+      taskTitle,
+      details,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setActivities((prev) => {
+      const updated = [newEntry, ...prev].slice(0, 40);
+      try {
+        localStorage.setItem('taskflow_activities', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
   // Close export dropdown on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -101,13 +143,21 @@ const Dashboard = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Keyboard Shortcuts (Linear-style)
+  // Keyboard Shortcuts (Linear-style & Cmd+K)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Global Command Palette shortcut: Cmd+K or Ctrl+K
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
       const activeTag = document.activeElement?.tagName;
       if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') {
         return;
       }
+
       if (e.key === 'n' || e.key === 'N') {
         e.preventDefault();
         setModal({ defaultStatus: 'todo' });
@@ -126,6 +176,8 @@ const Dashboard = () => {
       } else if (e.key === '?') {
         e.preventDefault();
         setShowShortcuts(true);
+      } else if (e.key === 'Escape') {
+        setSelectedTaskIds([]);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -152,16 +204,20 @@ const Dashboard = () => {
   const handleTaskSaved = async (formData, taskId) => {
     if (taskId) {
       await dispatch(updateTask({ id: taskId, data: formData }));
+      logActivity('status', 'Updated task', formData.title);
       toast.success('Task updated! ✏️');
     } else {
       await dispatch(createTask(formData));
+      logActivity('create', 'Created task', formData.title, `${formData.priority.toUpperCase()} · ${formData.category}`);
       toast.success('Task created! ✅');
     }
     setModal(null);
   };
 
   const handleStatusChange = async (taskId, newStatus) => {
+    const targetTask = tasks.find((t) => t._id === taskId);
     await dispatch(updateTaskStatus({ id: taskId, status: newStatus }));
+    logActivity('status', `Moved to ${newStatus}`, targetTask?.title || 'Task');
     if (newStatus === 'done') {
       toast.success('Task completed! 🎉');
     } else {
@@ -170,8 +226,11 @@ const Dashboard = () => {
   };
 
   const handleDelete = async (taskId) => {
+    const targetTask = tasks.find((t) => t._id === taskId);
     if (!window.confirm('Delete this task?')) return;
     await dispatch(deleteTask(taskId));
+    logActivity('delete', 'Deleted task', targetTask?.title || 'Task');
+    setSelectedTaskIds((prev) => prev.filter((id) => id !== taskId));
     toast.success('Task deleted! 🗑️');
   };
 
@@ -190,7 +249,56 @@ const Dashboard = () => {
         : [],
     };
     await dispatch(createTask(payload));
+    logActivity('duplicate', 'Duplicated task', task.title);
     toast.success('Task duplicated! 📋');
+  };
+
+  // Multi-Select & Batch Operations Handlers
+  const handleToggleSelectTask = (taskId) => {
+    setSelectedTaskIds((prev) =>
+      prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  const handleSelectAllGroup = (groupTaskIds) => {
+    const allSelected = groupTaskIds.every((id) => selectedTaskIds.includes(id));
+    if (allSelected) {
+      setSelectedTaskIds((prev) => prev.filter((id) => !groupTaskIds.includes(id)));
+    } else {
+      setSelectedTaskIds((prev) => Array.from(new Set([...prev, ...groupTaskIds])));
+    }
+  };
+
+  const handleBatchStatusChange = async (newStatus) => {
+    if (selectedTaskIds.length === 0) return;
+    const count = selectedTaskIds.length;
+    await Promise.all(
+      selectedTaskIds.map((id) => dispatch(updateTaskStatus({ id, status: newStatus })))
+    );
+    logActivity('batch', `Batch updated ${count} tasks`, '', `Moved to ${newStatus}`);
+    setSelectedTaskIds([]);
+    toast.success(`Updated ${count} tasks to ${newStatus}! ⚡`);
+  };
+
+  const handleBatchPriorityChange = async (newPriority) => {
+    if (selectedTaskIds.length === 0) return;
+    const count = selectedTaskIds.length;
+    await Promise.all(
+      selectedTaskIds.map((id) => dispatch(updateTask({ id, data: { priority: newPriority } })))
+    );
+    logActivity('batch', `Batch updated priority`, '', `${count} tasks set to ${newPriority}`);
+    setSelectedTaskIds([]);
+    toast.success(`Updated priority on ${count} tasks! ⚡`);
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedTaskIds.length === 0) return;
+    const count = selectedTaskIds.length;
+    if (!window.confirm(`Delete ${count} selected tasks?`)) return;
+    await Promise.all(selectedTaskIds.map((id) => dispatch(deleteTask(id))));
+    logActivity('delete', `Batch deleted ${count} tasks`);
+    setSelectedTaskIds([]);
+    toast.success(`Deleted ${count} tasks! 🗑️`);
   };
 
   // In-Card Subtasks handlers
@@ -263,6 +371,7 @@ const Dashboard = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    logActivity('batch', 'Exported tasks to CSV');
     toast.success('Tasks exported to CSV! 📊');
     setExportMenuOpen(false);
   };
@@ -283,6 +392,7 @@ const Dashboard = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    logActivity('batch', 'Exported backup to JSON');
     toast.success('Backup exported to JSON! 💾');
     setExportMenuOpen(false);
   };
@@ -394,11 +504,40 @@ const Dashboard = () => {
           ))}
 
           <div className="sidebar-section-title" style={{ marginTop: '16px' }}>
-            Quick Tools
+            Staff Tools
           </div>
-          <button className="sidebar-item" onClick={() => setShowAnalytics(true)}>
-            <BarChart3 size={15} color="var(--accent-secondary)" />
+          <button
+            className="sidebar-item"
+            onClick={() => setIsCommandPaletteOpen(true)}
+            title="Open Command Palette (Cmd+K)"
+          >
+            <Command size={15} color="var(--accent-secondary)" />
+            <span>Command Menu</span>
+            <kbd className="sidebar-kbd">⌘K</kbd>
+          </button>
+          <button
+            className="sidebar-item"
+            onClick={() => setIsFocusTimerOpen(true)}
+            title="Open Deep Work Focus Engine"
+          >
+            <Clock size={15} color="var(--green)" />
+            <span>Focus Engine</span>
+          </button>
+          <button
+            className="sidebar-item"
+            onClick={() => setShowAnalytics(true)}
+            title="Productivity Insights (A)"
+          >
+            <BarChart3 size={15} color="var(--yellow)" />
             <span>Productivity Insights</span>
+          </button>
+          <button
+            className="sidebar-item"
+            onClick={() => setIsActivityDrawerOpen(true)}
+            title="Session Audit Log"
+          >
+            <Activity size={15} color="var(--blue)" />
+            <span>Session Audit Log</span>
           </button>
           <button className="sidebar-item" onClick={() => setShowShortcuts(true)}>
             <Keyboard size={15} color="var(--text-muted)" />
@@ -423,13 +562,34 @@ const Dashboard = () => {
             </div>
 
             <div className="dashboard-header-actions">
+              {/* Command Palette Trigger */}
+              <button
+                className="btn btn-secondary btn-sm command-trigger-header"
+                onClick={() => setIsCommandPaletteOpen(true)}
+                title="Command Palette (Ctrl+K / Cmd+K)"
+              >
+                <Command size={14} />
+                <span className="hide-mobile">Commands</span>
+                <kbd className="kbd-shortcut-pill">⌘K</kbd>
+              </button>
+
+              {/* Focus Timer Button */}
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setIsFocusTimerOpen(true)}
+                title="Deep Work Focus Engine"
+              >
+                <Clock size={14} />
+                <span className="hide-mobile">Focus</span>
+              </button>
+
               {/* Analytics Button */}
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setShowAnalytics(true)}
                 title="View Productivity Analytics (A)"
               >
-                <BarChart3 size={15} />
+                <BarChart3 size={14} />
                 <span className="hide-mobile">Insights</span>
               </button>
 
@@ -508,7 +668,7 @@ const Dashboard = () => {
               <input
                 ref={searchInputRef}
                 className="search-input"
-                placeholder="Search tasks, descriptions, tags... (Press /)"
+                placeholder="Search tasks, tags... (Press / or ⌘K)"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
@@ -609,6 +769,9 @@ const Dashboard = () => {
           ) : viewMode === 'list' ? (
             <TaskListView
               tasks={displayedTasks}
+              selectedTaskIds={selectedTaskIds}
+              onToggleSelectTask={handleToggleSelectTask}
+              onSelectAllGroup={handleSelectAllGroup}
               onStatusChange={handleStatusChange}
               onEdit={(task) => setModal({ task })}
               onDelete={handleDelete}
@@ -648,11 +811,14 @@ const Dashboard = () => {
                         const completedSubtasks =
                           task.subtasks?.filter((s) => s.completed).length || 0;
                         const isExpanded = !!expandedCards[task._id];
+                        const isSelected = selectedTaskIds.includes(task._id);
 
                         return (
                           <div
                             key={task._id}
-                            className={`task-card priority-${task.priority}`}
+                            className={`task-card priority-${task.priority} ${
+                              isSelected ? 'card-selected' : ''
+                            }`}
                             draggable
                             onDragStart={(e) => handleDragStart(e, task._id)}
                           >
@@ -847,6 +1013,53 @@ const Dashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Floating Bulk Action Bar */}
+      <BulkActionBar
+        selectedCount={selectedTaskIds.length}
+        onBatchStatusChange={handleBatchStatusChange}
+        onBatchPriorityChange={handleBatchPriorityChange}
+        onBatchDelete={handleBatchDelete}
+        onClearSelection={() => setSelectedTaskIds([])}
+      />
+
+      {/* Raycast/Linear Command Palette (Cmd+K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        tasks={tasks}
+        onSelectTask={(task) => setModal({ task })}
+        onNewTask={() => setModal({ defaultStatus: 'todo' })}
+        onSwitchView={handleSetViewMode}
+        onOpenAnalytics={() => setShowAnalytics(true)}
+        onOpenFocusTimer={() => setIsFocusTimerOpen(true)}
+        onOpenActivity={() => setIsActivityDrawerOpen(true)}
+        onExportCSV={handleExportCSV}
+        onExportJSON={handleExportJSON}
+        onFilterPriority={(p) => dispatch(setFilter({ priority: p }))}
+        onFilterCategory={(c) => setCategoryFilter(c)}
+      />
+
+      {/* Pomodoro Focus Timer Modal */}
+      {isFocusTimerOpen && (
+        <FocusTimerModal
+          tasks={tasks}
+          onClose={() => setIsFocusTimerOpen(false)}
+          onTaskCompleted={(id) => handleStatusChange(id, 'done')}
+        />
+      )}
+
+      {/* Session Audit Log Drawer */}
+      <ActivityDrawer
+        isOpen={isActivityDrawerOpen}
+        onClose={() => setIsActivityDrawerOpen(false)}
+        activities={activities}
+        onClearActivities={() => {
+          setActivities([]);
+          localStorage.removeItem('taskflow_activities');
+          toast.success('Activity log cleared');
+        }}
+      />
 
       {/* Task Modal (Create / Edit) */}
       {modal && (

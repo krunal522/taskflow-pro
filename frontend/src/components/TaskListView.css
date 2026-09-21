@@ -70,6 +70,34 @@
   box-shadow: var(--shadow-sm);
 }
 
+.list-group-select-all-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.list-select-box-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.list-row-wrapper.row-selected {
+  background: rgba(124, 58, 237, 0.08) !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.15);
+}
+
 /* Priority Left Accent Border on list row */
 .list-row-wrapper.high { border-left: 3px solid #ef4444; }
 .list-row-wrapper.medium { border-left: 3px solid #f59e0b; }

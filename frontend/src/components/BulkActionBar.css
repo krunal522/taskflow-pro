@@ -1,0 +1,162 @@
+/* ============================================
+   BULK ACTION BAR — Enterprise Floating Dock
+   ============================================ */
+
+.bulk-action-bar-container {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  animation: slideUpFloat 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 90vw;
+}
+
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: rgba(15, 15, 26, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(124, 58, 237, 0.25);
+}
+
+.bulk-count-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 100px;
+}
+
+.count-number {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent-secondary);
+}
+
+.count-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.bulk-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.bulk-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulk-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border: 1px solid transparent;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.bulk-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.bulk-action-btn.done:hover {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--green);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.bulk-action-btn.inprogress:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--yellow);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.bulk-action-btn.delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.bulk-action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fff;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.bulk-select-wrap {
+  position: relative;
+}
+
+.bulk-priority-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.bulk-priority-select:focus,
+.bulk-priority-select:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.bulk-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.bulk-close-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+@keyframes slideUpFloat {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .bulk-action-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+}
