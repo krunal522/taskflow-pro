@@ -1,0 +1,607 @@
+/* ============================================
+   TASK MODAL — Enterprise 6+ Years UX Design
+   ============================================ */
+
+.task-modal-box {
+  background: rgba(18, 18, 30, 0.96) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  width: 100%;
+  max-width: 620px !important;
+  max-height: 90vh !important;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7),
+              0 0 40px rgba(124, 58, 237, 0.15) !important;
+  overflow: hidden;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Modal Header Bar */
+.task-modal-header {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.task-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.task-modal-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+.task-modal-badge.edit {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.task-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.task-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-modal-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.task-modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Modal Body Scroll Area */
+.task-modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: calc(90vh - 150px);
+}
+
+.task-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.task-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+/* Form Groups & Labels */
+.pro-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-form-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pro-char-counter {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: none;
+}
+
+/* Segmented Control / Pill Selectors */
+.pro-segmented-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pro-segmented-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pro-segmented-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pro-segmented-btn.active-todo {
+  background: rgba(148, 163, 184, 0.15);
+  color: #f1f5f9;
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pro-segmented-btn.active-inprogress {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.pro-segmented-btn.active-done {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+/* Priority Matrix Cards */
+.pro-priority-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pro-priority-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pro-priority-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--text-primary);
+}
+
+.pro-priority-card.active-low {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.15);
+}
+
+.pro-priority-card.active-medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.15);
+}
+
+.pro-priority-card.active-high {
+  background: rgba(239, 68, 68, 0.14);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.2);
+}
+
+/* ========================================================
+   DATE PICKER — FULL AREA CLICKABLE + QUICK PRESETS
+   ======================================================== */
+.pro-date-picker-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  user-select: none;
+}
+
+.pro-date-picker-box:hover {
+  background: rgba(124, 58, 237, 0.06);
+  border-color: var(--accent-primary);
+}
+
+.pro-date-picker-box:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.pro-date-icon {
+  color: var(--accent-secondary);
+  flex-shrink: 0;
+}
+
+.pro-date-native-input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  font-family: inherit !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  color-scheme: dark;
+}
+
+.pro-date-native-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.8;
+  padding: 2px;
+  transition: transform 0.2s ease;
+}
+.pro-date-native-input::-webkit-calendar-picker-indicator:hover {
+  transform: scale(1.2);
+}
+
+.pro-date-clear-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.pro-date-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* Quick Date Presets Row */
+.pro-date-presets-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pro-preset-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pro-preset-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pro-preset-pill.active {
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--accent-secondary);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.pro-date-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pro-date-badge.overdue {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.pro-date-badge.today {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.pro-date-badge.upcoming {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* ========================================================
+   TAGS MANAGER — Interactive Chip Pills + Suggestions
+   ======================================================== */
+.pro-tag-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-tag-chips-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  min-height: 44px;
+  transition: all 0.2s ease;
+}
+
+.pro-tag-chips-wrapper:focus-within {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.pro-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(124, 58, 237, 0.15);
+  color: #c4b5fd;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  animation: tagPopIn 0.2s ease;
+}
+
+@keyframes tagPopIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.pro-tag-remove-btn {
+  background: none;
+  border: none;
+  color: #c4b5fd;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.pro-tag-remove-btn:hover {
+  opacity: 1;
+}
+
+.pro-tag-inline-input {
+  flex: 1;
+  min-width: 140px;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  font-family: inherit !important;
+  padding: 2px 4px !important;
+}
+
+.pro-tag-suggestions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pro-tag-suggest-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.pro-tag-suggest-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* ========================================================
+   SUBTASKS CHECKLIST — Progress Bar & Modern List
+   ======================================================== */
+.pro-checklist-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pro-checklist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pro-checklist-progress-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pro-checklist-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), #10b981);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.pro-subtask-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.pro-subtask-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pro-subtask-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.pro-subtask-item.completed .pro-subtask-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.pro-subtask-delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+.pro-subtask-delete-btn:hover {
+  opacity: 1;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Modal Footer */
+.task-modal-footer {
+  padding: 16px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.task-modal-shortcuts-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pro-key-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-secondary);
+}
+
+.task-modal-footer-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .task-modal-box {
+    max-height: 95vh !important;
+    border-radius: 16px !important;
+  }
+  .task-modal-header { padding: 16px 20px; }
+  .task-modal-body { padding: 18px 20px; gap: 16px; }
+  .task-modal-footer { padding: 14px 20px; flex-direction: column; gap: 12px; }
+  .task-modal-shortcuts-hint { display: none; }
+  .task-modal-footer-btns { width: 100%; }
+  .task-modal-footer-btns button { flex: 1; }
+  .pro-priority-grid, .pro-segmented-row {
+    grid-template-columns: 1fr;
+  }
+}
