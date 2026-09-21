@@ -221,3 +221,16 @@
     transform: translateX(0);
   }
 }
+
+@media (max-width: 480px) {
+  .activity-drawer {
+    max-width: 100%;
+    width: 100%;
+  }
+  .activity-header {
+    padding: 16px 18px;
+  }
+  .activity-body {
+    padding: 14px 16px;
+  }
+}

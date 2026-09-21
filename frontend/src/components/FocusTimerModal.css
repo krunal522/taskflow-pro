@@ -318,3 +318,40 @@
   color: var(--text-primary);
   border-color: var(--border-active);
 }
+
+@media (max-width: 640px) {
+  .focus-modal-box {
+    max-width: 95vw;
+    border-radius: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .focus-header {
+    padding: 14px 18px;
+  }
+  .focus-body {
+    padding: 16px;
+  }
+  .focus-modes-tabs {
+    gap: 6px;
+  }
+  .focus-mode-tab {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .focus-timer-ring-container {
+    width: 180px;
+    height: 180px;
+    margin: 12px auto;
+  }
+  .focus-time-text {
+    font-size: 32px;
+  }
+  .focus-controls {
+    margin-top: 12px;
+  }
+  .focus-play-btn {
+    padding: 10px 22px;
+    font-size: 13px;
+  }
+}

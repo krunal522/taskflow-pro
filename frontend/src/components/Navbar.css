@@ -168,16 +168,46 @@
 }
 
 @media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+    height: 58px;
+  }
   .navbar-search-command-btn {
     min-width: unset;
-    padding: 6px 10px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
   }
-  .navbar-cmd-text {
+  .navbar-cmd-text,
+  .navbar-cmd-kbd {
     display: none;
+  }
+  .navbar-logo {
+    font-size: 17px;
+  }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  .user-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
   }
 }
 
-@media (max-width: 640px) {
-  .navbar { padding: 0 16px; }
-  .navbar-logo span { display: none; }
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 12px;
+  }
+  .navbar-actions {
+    gap: 8px;
+  }
+  .navbar-logo span {
+    font-size: 16px;
+  }
 }

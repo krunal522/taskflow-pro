@@ -106,6 +106,7 @@ const Dashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dueSoonFilter, setDueSoonFilter] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [mobileCol, setMobileCol] = useState('all');
 
   // In-Card Subtasks Accordion State
   const [expandedCards, setExpandedCards] = useState({});
@@ -587,7 +588,7 @@ const Dashboard = () => {
               >
                 <Command size={14} />
                 <span className="hide-mobile">Commands</span>
-                <kbd className="kbd-shortcut-pill">{cmdKeyLabel}</kbd>
+                <kbd className="kbd-shortcut-pill hide-mobile">{cmdKeyLabel}</kbd>
               </button>
 
               {/* Focus Timer Button */}
@@ -797,18 +798,43 @@ const Dashboard = () => {
               onAddSubtaskInline={handleAddSubtaskInline}
             />
           ) : (
-            <div className="kanban-board">
-              {COLUMNS.map((col) => {
-                const colTasks = getColumnTasks(col.key);
-                const isDragOver = draggedOverCol === col.key;
-                return (
-                  <div
-                    key={col.key}
-                    className={`kanban-column ${col.key} ${isDragOver ? 'drag-over' : ''}`}
-                    onDragOver={(e) => handleDragOver(e, col.key)}
-                    onDragLeave={() => handleDragLeave(col.key)}
-                    onDrop={(e) => handleDrop(e, col.key)}
-                  >
+            <>
+              {/* Mobile Column Navigation Switcher */}
+              <div className="mobile-column-tabs">
+                <button
+                  type="button"
+                  className={`mobile-col-tab ${mobileCol === 'all' ? 'active' : ''}`}
+                  onClick={() => setMobileCol('all')}
+                >
+                  ▦ All ({displayedTasks.length})
+                </button>
+                {COLUMNS.map((col) => {
+                  const count = getColumnTasks(col.key).length;
+                  return (
+                    <button
+                      key={col.key}
+                      type="button"
+                      className={`mobile-col-tab ${col.key} ${mobileCol === col.key ? 'active' : ''}`}
+                      onClick={() => setMobileCol(col.key)}
+                    >
+                      {col.emoji} {col.label} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="kanban-board">
+                {(mobileCol === 'all' ? COLUMNS : COLUMNS.filter((c) => c.key === mobileCol)).map((col) => {
+                  const colTasks = getColumnTasks(col.key);
+                  const isDragOver = draggedOverCol === col.key;
+                  return (
+                    <div
+                      key={col.key}
+                      className={`kanban-column ${col.key} ${isDragOver ? 'drag-over' : ''}`}
+                      onDragOver={(e) => handleDragOver(e, col.key)}
+                      onDragLeave={() => handleDragLeave(col.key)}
+                      onDrop={(e) => handleDrop(e, col.key)}
+                    >
                     <div className="column-header">
                       <div className="column-title">
                         <span className="col-dot" /> {col.emoji} {col.label}
@@ -1027,8 +1053,9 @@ const Dashboard = () => {
                 );
               })}
             </div>
-          )}
-        </main>
+          </>
+        )}
+      </main>
       </div>
 
       {/* Floating Bulk Action Bar */}
@@ -1105,6 +1132,17 @@ const Dashboard = () => {
 
       {/* Keyboard Shortcuts Modal */}
       {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
+
+      {/* Mobile Floating Action Button (FAB) for 1-Tap Task Creation */}
+      <button
+        type="button"
+        className="mobile-fab"
+        onClick={() => setModal({ defaultStatus: 'todo' })}
+        title="Create New Task"
+        aria-label="Create New Task"
+      >
+        <Plus size={24} />
+      </button>
     </div>
   );
 };
