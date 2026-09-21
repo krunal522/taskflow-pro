@@ -24,6 +24,10 @@ const userRoutes = require('./routes/userRoutes');
 // Initialize Express App
 const app = express();
 
+// Trust reverse proxy (Render, Vercel, Heroku, Nginx)
+// Required for correct client IP detection with rate limiting
+app.set('trust proxy', 1);
+
 // ============================================
 // MIDDLEWARE
 // ============================================

@@ -12,7 +12,7 @@ const appConfig = {
   userKey: 'taskflow_user',
   themeKey: 'taskflow_theme',
   defaultTheme: 'dark' as const,
-  requestTimeout: 10_000, // 10 seconds
+  requestTimeout: 35_000, // 35 seconds (allows for Render free tier cold starts)
   pagination: {
     defaultPageSize: 20,
     pageSizeOptions: [10, 20, 50, 100],

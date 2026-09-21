@@ -31,7 +31,13 @@ export const loginThunk = createAsyncThunk(
     try {
       return await authService.login(payload);
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Login failed');
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        return rejectWithValue('Server request timed out. The backend is waking up, please try again in a few moments.');
+      }
+      if (!err.response) {
+        return rejectWithValue('Cannot connect to server. Please verify your internet connection or backend status.');
+      }
+      return rejectWithValue(err.response?.data?.message || 'Login failed. Please verify your credentials.');
     }
   }
 );
@@ -42,7 +48,13 @@ export const registerThunk = createAsyncThunk(
     try {
       return await authService.register(payload);
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Registration failed');
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        return rejectWithValue('Server request timed out. The backend is waking up, please try again in a few moments.');
+      }
+      if (!err.response) {
+        return rejectWithValue('Cannot connect to server. Please verify your internet connection or backend status.');
+      }
+      return rejectWithValue(err.response?.data?.message || 'Registration failed. Please try again.');
     }
   }
 );

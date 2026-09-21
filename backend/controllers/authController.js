@@ -4,6 +4,7 @@
 // ============================================
 
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 const User = require('../models/User');
 
 // Helper: Generate JWT Token
@@ -22,27 +23,36 @@ const generateToken = (userId) => {
 // ============================================
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-
-    // Basic validation
-    if (!name || !email || !password) {
+    // Validate request using express-validator
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const first = errors.array()[0];
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, email and password',
+        message: first.msg,
+        field: first.path,
+        errors: errors.array(),
       });
     }
 
+    const { name, email, password } = req.body;
+
     // Check if email already exists in MongoDB
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Email already registered. Please login.',
+        message: 'This email is already registered. Please sign in instead.',
+        field: 'email',
       });
     }
 
     // Create user in MongoDB (password hashed via pre-save hook)
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password,
+    });
 
     // Generate JWT
     const token = generateToken(user._id);
@@ -60,7 +70,7 @@ const register = async (req, res) => {
       return res.status(400).json({ success: false, message: messages.join(', ') });
     }
     console.error('Register Error:', error);
-    res.status(500).json({ success: false, message: 'Server error during registration' });
+    res.status(500).json({ success: false, message: 'Server error during registration. Please try again.' });
   }
 };
 
@@ -71,22 +81,27 @@ const register = async (req, res) => {
 // ============================================
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
+    // Validate request using express-validator
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const first = errors.array()[0];
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password',
+        message: first.msg,
+        field: first.path,
+        errors: errors.array(),
       });
     }
 
+    const { email, password } = req.body;
+
     // Find user & explicitly select password (select:false in schema)
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid email or password. Please verify your credentials.',
       });
     }
 
@@ -95,7 +110,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid email or password. Please verify your credentials.',
       });
     }
 
@@ -110,7 +125,7 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ success: false, message: 'Server error during login' });
+    res.status(500).json({ success: false, message: 'Server error during login. Please try again.' });
   }
 };
 

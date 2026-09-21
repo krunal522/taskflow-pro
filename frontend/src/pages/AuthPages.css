@@ -106,14 +106,50 @@
 
 .auth-error {
   background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius-md);
   padding: 12px 16px;
   font-size: 13px;
   color: #f87171;
   display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.auth-notice {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #93c5fd;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  line-height: 1.4;
+  animation: pulseNotice 2s infinite ease-in-out;
+}
+
+@keyframes pulseNotice {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .input-wrapper { position: relative; }
@@ -125,27 +161,122 @@
   transform: translateY(-50%);
   color: var(--text-muted);
   pointer-events: none;
+  transition: var(--transition-fast);
 }
 
 .input-with-icon {
   padding-left: 42px !important;
 }
 
-.password-toggle {
+.input-trailing {
   position: absolute;
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-input.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.form-input.is-valid {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #f87171;
+  margin-top: 4px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.password-strength-container {
+  margin-top: 6px;
+}
+
+.password-strength-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.password-strength-bars {
+  display: flex;
+  gap: 5px;
+  height: 4px;
+}
+
+.password-strength-bar {
+  flex: 1;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s ease;
+}
+
+.password-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.password-criterion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.password-criterion.met {
+  color: #34d399;
+}
+
+.password-toggle {
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
+  padding: 4px;
   transition: var(--transition-fast);
 }
-.password-toggle:hover { color: var(--text-secondary); }
+.password-toggle:hover { color: var(--text-primary); }
+
+.auth-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.4;
+}
+
+.auth-checkbox-label input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
 
 @media (max-width: 480px) {
   .auth-card { padding: 28px 20px; }
+  .password-checklist { grid-template-columns: 1fr; }
 }
