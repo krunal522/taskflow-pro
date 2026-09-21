@@ -25,6 +25,7 @@ import {
   Command,
   Activity,
   Target,
+  Check,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
@@ -107,6 +108,8 @@ const Dashboard = () => {
   const [dueSoonFilter, setDueSoonFilter] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [mobileCol, setMobileCol] = useState('all');
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
 
   // In-Card Subtasks Accordion State
   const [expandedCards, setExpandedCards] = useState({});
@@ -117,6 +120,8 @@ const Dashboard = () => {
 
   const searchInputRef = useRef(null);
   const exportMenuRef = useRef(null);
+  const categoryDropdownRef = useRef(null);
+  const sortDropdownRef = useRef(null);
   const debouncedSearch = useDebounce(searchInput, 350);
 
   // Activity logger helper
@@ -138,11 +143,17 @@ const Dashboard = () => {
     });
   };
 
-  // Close export dropdown on outside click
+  // Close export & filter dropdowns on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
         setExportMenuOpen(false);
+      }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(e.target)) {
+        setCategoryDropdownOpen(false);
+      }
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target)) {
+        setSortDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
@@ -678,6 +689,27 @@ const Dashboard = () => {
             <span className="completion-pct">{completionRate}%</span>
           </div>
 
+          {/* Category Horizontal Quick Filter Chips */}
+          <div className="category-scroll-chips" role="tablist" aria-label="Category filter">
+            <button
+              type="button"
+              className={`cat-chip ${categoryFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setCategoryFilter('all')}
+            >
+              All Categories
+            </button>
+            {CATEGORY_OPTIONS.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                className={`cat-chip ${categoryFilter === cat ? 'active' : ''}`}
+                onClick={() => setCategoryFilter(categoryFilter === cat ? 'all' : cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
           {/* Search, Filters & View Toggle Toolbar */}
           <div className="toolbar">
             {/* Search Input */}
@@ -701,21 +733,57 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Category Filter */}
-            <div className="toolbar-select-wrap">
-              <Layers size={14} className="toolbar-select-icon" />
-              <select
-                className="form-select toolbar-select"
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+            {/* Custom Category Dropdown */}
+            <div className="custom-select-wrap" ref={categoryDropdownRef}>
+              <button
+                type="button"
+                className={`custom-select-trigger ${categoryFilter !== 'all' ? 'active' : ''}`}
+                onClick={() => {
+                  setCategoryDropdownOpen((prev) => !prev);
+                  setSortDropdownOpen(false);
+                }}
+                aria-expanded={categoryDropdownOpen}
+                aria-haspopup="listbox"
               >
-                <option value="all">All Categories</option>
-                {CATEGORY_OPTIONS.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                <Layers size={14} className="custom-select-icon" />
+                <span className="custom-select-label">
+                  {categoryFilter === 'all' ? 'All Categories' : categoryFilter}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`custom-select-chevron ${categoryDropdownOpen ? 'open' : ''}`}
+                />
+              </button>
+
+              {categoryDropdownOpen && (
+                <div className="custom-select-menu" role="listbox">
+                  <button
+                    type="button"
+                    className={`custom-select-item ${categoryFilter === 'all' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setCategoryFilter('all');
+                      setCategoryDropdownOpen(false);
+                    }}
+                  >
+                    <span>All Categories</span>
+                    {categoryFilter === 'all' && <Check size={13} className="custom-select-check" />}
+                  </button>
+                  {CATEGORY_OPTIONS.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`custom-select-item ${categoryFilter === cat ? 'selected' : ''}`}
+                      onClick={() => {
+                        setCategoryFilter(cat);
+                        setCategoryDropdownOpen(false);
+                      }}
+                    >
+                      <span>{cat}</span>
+                      {categoryFilter === cat && <Check size={13} className="custom-select-check" />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Due Soon Toggle Chip */}
@@ -729,18 +797,54 @@ const Dashboard = () => {
               <span>Due Soon / Overdue</span>
             </button>
 
-            {/* Sort Dropdown */}
-            <div className="toolbar-select-wrap">
-              <ArrowUpDown size={14} className="toolbar-select-icon" />
-              <select
-                className="form-select toolbar-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+            {/* Custom Sort Dropdown */}
+            <div className="custom-select-wrap" ref={sortDropdownRef}>
+              <button
+                type="button"
+                className="custom-select-trigger"
+                onClick={() => {
+                  setSortDropdownOpen((prev) => !prev);
+                  setCategoryDropdownOpen(false);
+                }}
+                aria-expanded={sortDropdownOpen}
+                aria-haspopup="listbox"
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="dueSoon">Due Soonest</option>
-              </select>
+                <ArrowUpDown size={14} className="custom-select-icon" />
+                <span className="custom-select-label">
+                  {sortBy === 'newest'
+                    ? 'Newest First'
+                    : sortBy === 'oldest'
+                    ? 'Oldest First'
+                    : 'Due Soonest'}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`custom-select-chevron ${sortDropdownOpen ? 'open' : ''}`}
+                />
+              </button>
+
+              {sortDropdownOpen && (
+                <div className="custom-select-menu" role="listbox">
+                  {[
+                    { key: 'newest', label: 'Newest First' },
+                    { key: 'oldest', label: 'Oldest First' },
+                    { key: 'dueSoon', label: 'Due Soonest' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      className={`custom-select-item ${sortBy === opt.key ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSortBy(opt.key);
+                        setSortDropdownOpen(false);
+                      }}
+                    >
+                      <span>{opt.label}</span>
+                      {sortBy === opt.key && <Check size={13} className="custom-select-check" />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Clear All Filters Button */}
