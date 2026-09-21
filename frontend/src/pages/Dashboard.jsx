@@ -64,6 +64,7 @@ const COLUMNS = [
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
   const rawTasks = useAppSelector(selectTasks);
   const rawStats = useAppSelector(selectTaskStats);
   const tasks = Array.isArray(rawTasks) ? rawTasks : [];
