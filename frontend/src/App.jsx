@@ -9,6 +9,7 @@ import ReduxProvider from './providers/ReduxProvider';
 import QueryProvider from './providers/QueryProvider';
 import ThemeProvider from './providers/ThemeProvider';
 import AppRoutes from './routes/AppRoutes';
+import ErrorBoundary from './components/ErrorBoundary';
 import appConfig from './config/appConfig';
 import './index.css';
 
@@ -18,7 +19,9 @@ function App() {
       <QueryProvider>
         <ThemeProvider>
           <BrowserRouter>
-            <AppRoutes />
+            <ErrorBoundary>
+              <AppRoutes />
+            </ErrorBoundary>
 
             <Toaster
               position={appConfig.toast.position}

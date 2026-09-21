@@ -13,8 +13,12 @@ export const storageService = {
 
   // User
   getUser: (): User | null => {
-    const u = localStorage.getItem(appConfig.userKey);
-    return u ? JSON.parse(u) : null;
+    try {
+      const u = localStorage.getItem(appConfig.userKey);
+      return u ? JSON.parse(u) : null;
+    } catch {
+      return null;
+    }
   },
   setUser: (user: User): void => localStorage.setItem(appConfig.userKey, JSON.stringify(user)),
   removeUser: (): void => localStorage.removeItem(appConfig.userKey),
@@ -31,8 +35,12 @@ export const storageService = {
 
   // Generic
   get: <T>(key: string): T | null => {
-    const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : null;
+    try {
+      const val = localStorage.getItem(key);
+      return val ? JSON.parse(val) : null;
+    } catch {
+      return null;
+    }
   },
   set: <T>(key: string, value: T): void => localStorage.setItem(key, JSON.stringify(value)),
   remove: (key: string): void => localStorage.removeItem(key),

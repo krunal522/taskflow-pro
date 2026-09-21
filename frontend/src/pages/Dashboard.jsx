@@ -64,12 +64,16 @@ const COLUMNS = [
 
 const Dashboard = () => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector(selectUser);
-  const tasks = useAppSelector(selectTasks);
-  const stats = useAppSelector(selectTaskStats);
+  const rawTasks = useAppSelector(selectTasks);
+  const rawStats = useAppSelector(selectTaskStats);
+  const tasks = Array.isArray(rawTasks) ? rawTasks : [];
+  const stats = rawStats || { total: 0, todo: 0, inprogress: 0, done: 0, highPriority: 0 };
   const status = useAppSelector(selectTaskStatus);
   const filters = useAppSelector(selectFilters);
   const loading = status === 'loading';
+
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const cmdKeyLabel = isMac ? '⌘K' : 'Ctrl+K';
 
   // Modal & View States
   const [modal, setModal] = useState(null);
@@ -143,12 +147,17 @@ const Dashboard = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Keyboard Shortcuts (Linear-style & Cmd+K)
+  // Keyboard Shortcuts (Linear-style & Cmd+K / Ctrl+K / Ctrl+P)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Global Command Palette shortcut: Cmd+K or Ctrl+K
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      // Global Command Palette shortcut: Cmd+K, Ctrl+K, Ctrl+P
+      const isK = e.key === 'k' || e.key === 'K' || e.code === 'KeyK';
+      const isP = e.key === 'p' || e.key === 'P' || e.code === 'KeyP';
+      const hasModifier = e.ctrlKey || e.metaKey;
+
+      if (hasModifier && (isK || isP)) {
         e.preventDefault();
+        e.stopPropagation();
         setIsCommandPaletteOpen((prev) => !prev);
         return;
       }
@@ -180,8 +189,15 @@ const Dashboard = () => {
         setSelectedTaskIds([]);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, []);
+
+  // Listen for open-command-palette event from Navbar or elsewhere
+  useEffect(() => {
+    const handleCustomOpen = () => setIsCommandPaletteOpen(true);
+    window.addEventListener('open-command-palette', handleCustomOpen);
+    return () => window.removeEventListener('open-command-palette', handleCustomOpen);
   }, []);
 
   const handleSetViewMode = (mode) => {
@@ -509,11 +525,11 @@ const Dashboard = () => {
           <button
             className="sidebar-item"
             onClick={() => setIsCommandPaletteOpen(true)}
-            title="Open Command Palette (Cmd+K)"
+            title={`Open Command Palette (${cmdKeyLabel})`}
           >
             <Command size={15} color="var(--accent-secondary)" />
             <span>Command Menu</span>
-            <kbd className="sidebar-kbd">⌘K</kbd>
+            <kbd className="sidebar-kbd">{cmdKeyLabel}</kbd>
           </button>
           <button
             className="sidebar-item"
@@ -566,11 +582,11 @@ const Dashboard = () => {
               <button
                 className="btn btn-secondary btn-sm command-trigger-header"
                 onClick={() => setIsCommandPaletteOpen(true)}
-                title="Command Palette (Ctrl+K / Cmd+K)"
+                title={`Command Palette (${cmdKeyLabel})`}
               >
                 <Command size={14} />
                 <span className="hide-mobile">Commands</span>
-                <kbd className="kbd-shortcut-pill">⌘K</kbd>
+                <kbd className="kbd-shortcut-pill">{cmdKeyLabel}</kbd>
               </button>
 
               {/* Focus Timer Button */}
@@ -1023,7 +1039,7 @@ const Dashboard = () => {
         onClearSelection={() => setSelectedTaskIds([])}
       />
 
-      {/* Raycast/Linear Command Palette (Cmd+K) */}
+      {/* Raycast/Linear Command Palette (Cmd+K / Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
@@ -1034,10 +1050,16 @@ const Dashboard = () => {
         onOpenAnalytics={() => setShowAnalytics(true)}
         onOpenFocusTimer={() => setIsFocusTimerOpen(true)}
         onOpenActivity={() => setIsActivityDrawerOpen(true)}
+        onOpenShortcuts={() => setShowShortcuts(true)}
         onExportCSV={handleExportCSV}
         onExportJSON={handleExportJSON}
         onFilterPriority={(p) => dispatch(setFilter({ priority: p }))}
+        onFilterStatus={(s) => dispatch(setFilter({ status: s }))}
         onFilterCategory={(c) => setCategoryFilter(c)}
+        onFilterDueSoon={() => setDueSoonFilter(true)}
+        onClearAllFilters={handleClearAllFilters}
+        onSortChange={(s) => setSortBy(s)}
+        onRefresh={() => dispatch(fetchTasks())}
       />
 
       {/* Pomodoro Focus Timer Modal */}

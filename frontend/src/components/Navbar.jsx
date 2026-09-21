@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
+import { LogOut, LayoutDashboard, Zap, User, Search, Command } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logout, selectUser, selectIsAuthenticated } from '../features/auth/store/authSlice';
@@ -29,6 +29,10 @@ const Navbar = () => {
     navigate(ROUTES.LOGIN);
   };
 
+  const handleOpenCommandPalette = () => {
+    window.dispatchEvent(new CustomEvent('open-command-palette'));
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
@@ -36,6 +40,19 @@ const Navbar = () => {
           <div className="logo-icon">⚡</div>
           <span className="gradient-text">TaskFlow Pro</span>
         </Link>
+
+        {isAuthenticated && user && (
+          <button
+            type="button"
+            className="navbar-search-command-btn"
+            onClick={handleOpenCommandPalette}
+            title="Search or Run Command (Ctrl+K)"
+          >
+            <Search size={14} className="navbar-cmd-icon" />
+            <span className="navbar-cmd-text">Search or run command...</span>
+            <kbd className="navbar-cmd-kbd">Ctrl+K</kbd>
+          </button>
+        )}
 
         <div className="navbar-actions">
           {isAuthenticated && user ? (
