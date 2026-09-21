@@ -47,7 +47,11 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
 
   const [tagInput, setTagInput] = useState('');
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
-  const [error, setError] = useState('');
+  const [touchedTitle, setTouchedTitle] = useState(false);
+  const [shakeTitle, setShakeTitle] = useState(false);
+  const [subtaskShake, setSubtaskShake] = useState(false);
+
+  const titleError = touchedTitle ? validators.taskTitle(form.title) : null;
 
   // Auto focus title on modal open
   useEffect(() => {
@@ -72,7 +76,6 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
-    if (error) setError('');
   };
 
   // ── Date Picker Helpers ─────────────────────────────────────
@@ -142,7 +145,11 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
   // ── Subtask Checklist ───────────────────────────────────────
   const handleAddSubtask = (e) => {
     if (e) e.preventDefault();
-    if (!newSubtaskTitle.trim()) return;
+    if (!newSubtaskTitle.trim()) {
+      setSubtaskShake(true);
+      setTimeout(() => setSubtaskShake(false), 450);
+      return;
+    }
     setForm((p) => ({
       ...p,
       subtasks: [...p.subtasks, { title: newSubtaskTitle.trim(), completed: false }],
@@ -168,9 +175,11 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
 
+    setTouchedTitle(true);
     const titleErr = validators.taskTitle(form.title);
     if (titleErr) {
-      setError(titleErr);
+      setShakeTitle(true);
+      setTimeout(() => setShakeTitle(false), 450);
       titleInputRef.current?.focus();
       return;
     }
@@ -218,45 +227,49 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
           </div>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div
-            style={{
-              margin: '16px 28px 0',
-              background: 'rgba(239,68,68,0.12)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              fontSize: '13px',
-              color: '#f87171',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <AlertCircle size={16} />
-            <span>{error}</span>
-          </div>
-        )}
-
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="task-modal-body" noValidate>
-          {/* Title Input */}
+          {/* Title Input — Professional Inline Validation */}
           <div className="pro-form-group">
             <div className="pro-form-label">
-              <span>Task Title *</span>
-              <span className="pro-char-counter">{form.title.length}/100</span>
+              <span>
+                Task Title <span style={{ color: '#ef4444' }}>*</span>
+              </span>
+              {titleError ? (
+                <span className="pro-inline-error-badge">
+                  <AlertCircle size={12} /> {titleError}
+                </span>
+              ) : (
+                <span className="pro-char-counter">{form.title.length}/100</span>
+              )}
             </div>
-            <input
-              ref={titleInputRef}
-              className="form-input"
-              name="title"
-              placeholder="e.g. Implement OAuth2 login with GitHub"
-              value={form.title}
-              onChange={handleChange}
-              maxLength={100}
-              style={{ fontSize: '15px', fontWeight: 600 }}
-            />
+            <div className="pro-input-wrapper">
+              <input
+                ref={titleInputRef}
+                className={`form-input ${titleError ? 'has-error' : ''} ${shakeTitle ? 'pro-shake' : ''}`}
+                name="title"
+                placeholder="e.g. Implement OAuth2 login with GitHub"
+                value={form.title}
+                onChange={handleChange}
+                onBlur={() => setTouchedTitle(true)}
+                maxLength={100}
+                style={{
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  paddingRight: titleError ? '38px' : '14px',
+                }}
+              />
+              {titleError && (
+                <div className="pro-input-trailing-error">
+                  <AlertCircle size={16} color="#ef4444" />
+                </div>
+              )}
+            </div>
+            {titleError && (
+              <div className="pro-field-error-subtext">
+                Please provide a descriptive title between 2 and 100 characters.
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -566,7 +579,7 @@ const TaskModal = ({ task, defaultStatus, onClose, onSaved }) => {
             {/* Add Subtask Input */}
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
-                className="form-input"
+                className={`form-input ${subtaskShake ? 'has-error pro-shake' : ''}`}
                 placeholder="Type checklist item and press Enter..."
                 value={newSubtaskTitle}
                 onChange={(e) => setNewSubtaskTitle(e.target.value)}
